@@ -11,16 +11,32 @@ class morseCode(App):
     def build(self):
         # cria a simbologia
         self.short_bit = '.'
-        self.long_bit = '_'
-        self.alphabet = {'A': (), 'B': (), 'C': (), 'D': (), 'E': (), 'F': (),
-                         'G': (), 'H': ()}
+        self.long_bit = '-'
+        self.alphabet = {'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..',
+                         'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
+                         'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+                         'M': '--', 'N': '-.', 'O': '---', 'P': '.--.',
+                         'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+                         'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+                         'Y': '-.--', 'Z': '--..', ' ': ' ', '1': '.----',
+                         '2': '..---', '3': '...--', '4': '....-',
+                         '5': '.....', '6': '-....', '7': '--...',
+                         '8': '---..', '9': '----.', '0': '-----',
+                         '.': '.-.-.-', ',': '--..--', '?': '..--..',
+                         '!': '-.-.--', '´': '.----.', '"': '.-..-.',
+                         '(': '-.--.', ')': '-.--.-', '&': '.-...',
+                         ':': '---...', ';': '-.-.-.', '/': '-..-.',
+                         '_': '..--.-', '=': '-...-', '+': '.-.-.',
+                         '-': '-....-', '$': '...-..-', '@': '.--.-.'
+                         }
         # cria gerenciador de tela
         self.sm = ScreenManager()
         # cria tela 1
         self.screen1 = Screen(name='screen1')
         self.label_screen_1 = Label(text='Digite o texto e clique em "Gerar código"',
-                                    size_hint=(0.8, 0.2),
-                                    pos_hint={'center_x': 0.5, 'center_y': 0.75}
+                                    size_hint=(0.8, 0.5),
+                                    pos_hint={'center_x': 0.5, 'center_y': 0.90},
+                                    font_size=20,
                                     )
         self.input_text_label_1 = TextInput(hint_text='Digite seu texto aqui',
                                             size_hint=(0.8, 0.2),
@@ -81,7 +97,20 @@ class morseCode(App):
 
     # cria o texto em morse
     def make_morse(self, *args):
-        self.label_screen_1.text = self.input_text_label_1._get_text()
+        text = self.input_text_label_1._get_text().upper()
+        morse = ''
+        if len(text) < 51:
+            for key, value in enumerate(text):
+                if value not in self.alphabet.keys():
+                    msg = f'O caractere {value} não faz parte do padrão morse internacional.'
+                    self.label_screen_1.text = msg
+                    return
+                else:
+                    morse += self.alphabet[value]
+            self.label_screen_1.text = morse
+        else:
+            self.label_screen_1.text = f'Seu texto tem {len(text)} caracteres, o limite recomendado é 50 por conversão.'
+        self.label_screen_1.text_size = self.label_screen_1.size
 
     # limpa a caixa de texto
     def clear_text_label_screen_1(self, *args):
