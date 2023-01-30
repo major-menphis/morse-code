@@ -5,13 +5,14 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.clipboard import Clipboard
+from pygame import mixer
+from time import sleep
 
 
 class morseCode(App):
     def build(self):
         # cria a simbologia
-        self.short_bit = '.'
-        self.long_bit = '-'
+        self.audio_bips = {'.': './sounds/bip_curto.mp3', '-': './sounds/bip_longo.mp3'}
         self.alphabet = {'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..',
                          'E': '.', 'F': '..-.', 'G': '--.', 'H': '....',
                          'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
@@ -84,6 +85,8 @@ class morseCode(App):
         # adiciona o menu e o gerenciador de telas ao layout do app
         self.layout.add_widget(self.menu)
         self.layout.add_widget(self.sm)
+        # inicializa o mixer de audio
+        mixer.init(frequency=16000)
 
         return self.layout
 
@@ -99,7 +102,7 @@ class morseCode(App):
     def make_morse(self, *args):
         text = self.input_text_label_1._get_text().upper()
         morse = ''
-        if len(text) < 51:
+        if len(text) < 51 and len(text) != 0:
             for key, value in enumerate(text):
                 if value not in self.alphabet.keys():
                     msg = f'O caractere {value} não faz parte do padrão morse internacional.'
@@ -108,14 +111,17 @@ class morseCode(App):
                 else:
                     morse += self.alphabet[value]
             self.label_screen_1.text = morse
-        else:
+            self.label_screen_1.text_size = self.label_screen_1.size
+        elif len(text) != 0:
             self.label_screen_1.text = f'Seu texto tem {len(text)} caracteres, o limite recomendado é 50 por conversão.'
-        self.label_screen_1.text_size = self.label_screen_1.size
+            self.label_screen_1.text_size = self.label_screen_1.size
+        else:
+            return
 
     # limpa a caixa de texto
     def clear_text_label_screen_1(self, *args):
         self.input_text_label_1.text = ''
-        self.label_screen_1.text = 'Digite o texto e clique em "Gerar código"'
+        self.label_screen_1.text = 'Para gerar um novo código digite o texto e clique em "Gerar código"'
 
     # copiar o texto do TextInput no label 1
     def copy_text_label_screen_1(self, *args):
@@ -124,7 +130,21 @@ class morseCode(App):
 
     # tocar o código gerado no label 1
     def play_text_label_screen_1(self, *args):
-        return self.label_screen_1.text
+        text = self.label_screen_1.text
+        if text[0] in '.- ':
+            for i in text:
+                if i != ' ':
+                    mixer.music.load(self.audio_bips[i])
+                    mixer.music.play()
+                    if i == '.':
+                        sleep(0.2)
+                    else:
+                        sleep(0.4)
+                    mixer.music.unload()
+                else:
+                    sleep(0.7)
+        else:
+            return
 
 
 if __name__ == '__main__':
